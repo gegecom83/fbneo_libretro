@@ -1,4 +1,4 @@
-# FinalBurn Neo [Libretro] User Manual
+# FinalBurn Neo [Libretro]
 
 ## English Version
 
