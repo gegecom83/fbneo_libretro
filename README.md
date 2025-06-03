@@ -84,7 +84,9 @@ You can configure:
 
 ## Screenshots
 
-*Want to add screenshots? Paste them here!*
+![main](https://github.com/gegecom83/fbneo_libretro/blob/main/main.png)
+![settings](https://github.com/gegecom83/fbneo_libretro/blob/main/settings.png) 
+
 
 ---
 
