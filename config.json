@@ -1,0 +1,53 @@
+{
+    "RETROARCH": "",
+    "RETROARCH_CORE": "",
+    "roms_dirs": {
+        "Arcade": "",
+        "CBS ColecoVision": "",
+        "Fairchild ChannelF": "",
+        "MSX 1": "",
+        "Nec PC-Engine": "",
+        "Nec SuperGrafX": "",
+        "Nec TurboGrafx-16": "",
+        "Nintendo Entertainment System": "",
+        "Nintendo Family Disk System": "",
+        "Super Nintendo Entertainment System": "",
+        "Sega GameGear": "",
+        "Sega Master System": "",
+        "Sega Megadrive": "",
+        "Sega SG-1000": "",
+        "SNK Neo-Geo Pocket": "",
+        "SNK Neo-Geo CD": "",
+        "ZX Spectrum": ""
+    },
+    "xml_dat_files": {
+        "Arcade": "",
+        "CBS ColecoVision": "",
+        "Fairchild ChannelF": "",
+        "MSX 1": "",
+        "Nec PC-Engine": "",
+        "Nec SuperGrafX": "",
+        "Nec TurboGrafx-16": "",
+        "Nintendo Entertainment System": "",
+        "Nintendo Family Disk System": "",
+        "Super Nintendo Entertainment System": "",
+        "Sega GameGear": "",
+        "Sega Master System": "",
+        "Sega Megadrive": "",
+        "Sega SG-1000": "",
+        "SNK Neo-Geo Pocket": "",
+        "SNK Neo-Geo CD": "",
+        "ZX Spectrum": ""
+    },
+    "joystick_config": {
+        "hat_scroll_cooldown": 0.02,
+        "hat_fastest_steps": 30,
+        "hat_fastest_delay": 0.5,
+        "button_up": 2,
+        "button_down": 3,
+        "button_select": 0,
+        "button_settings": 7,
+        "button_prev_tab": 4,
+        "button_next_tab": 5
+    }
+}

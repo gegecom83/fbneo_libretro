@@ -1,0 +1,53 @@
+{
+    "RETROARCH": "C:/Programs/RetroArch/retroarch.exe",
+    "RETROARCH_CORE": "C:/Programs/RetroArch/cores/fbneo_libretro.dll",
+    "roms_dirs": {
+        "Arcade": "C:/Programs/FinalBurn Neo/roms/arcade",
+        "CBS ColecoVision": "C:/Programs/FinalBurn Neo/roms/coleco",
+        "Fairchild ChannelF": "C:/Programs/FinalBurn Neo/roms/channelf",
+        "MSX 1": "C:/Programs/FinalBurn Neo/roms/msx",
+        "Nec PC-Engine": "C:/Programs/FinalBurn Neo/roms/pce",
+        "Nec SuperGrafX": "C:/Programs/FinalBurn Neo/roms/sgx",
+        "Nec TurboGrafx-16": "C:/Programs/FinalBurn Neo/roms/tg16",
+        "Nintendo Entertainment System": "C:/Programs/FinalBurn Neo/roms/nes",
+        "Nintendo Family Disk System": "C:/Programs/FinalBurn Neo/roms/fds",
+        "Super Nintendo Entertainment System": "C:/Programs/FinalBurn Neo/roms/snes",
+        "Sega GameGear": "C:/Programs/FinalBurn Neo/roms/gamegear",
+        "Sega Master System": "C:/Programs/FinalBurn Neo/roms/sms",
+        "Sega Megadrive": "C:/Programs/FinalBurn Neo/roms/megadrive",
+        "Sega SG-1000": "C:/Programs/FinalBurn Neo/roms/sg1000",
+        "SNK Neo-Geo Pocket": "C:/Programs/FinalBurn Neo/roms/ngp",
+        "SNK Neo-Geo CD": "D:/neogeocd",
+        "ZX Spectrum": "C:/Programs/FinalBurn Neo/roms/spectrum"
+    },
+    "xml_dat_files": {
+        "Arcade": "C:/Build/libretro/FBNeo/dats/FinalBurn Neo (ClrMame Pro XML, Arcade only).dat",
+        "CBS ColecoVision": "C:/Build/libretro/FBNeo/dats/FinalBurn Neo (ClrMame Pro XML, ColecoVision only).dat",
+        "Fairchild ChannelF": "C:/Build/libretro/FBNeo/dats/FinalBurn Neo (ClrMame Pro XML, Fairchild Channel F Games only).dat",
+        "MSX 1": "C:/Build/libretro/FBNeo/dats/FinalBurn Neo (ClrMame Pro XML, MSX 1 Games only).dat",
+        "Nec PC-Engine": "C:/Build/libretro/FBNeo/dats/FinalBurn Neo (ClrMame Pro XML, PC-Engine only).dat",
+        "Nec SuperGrafX": "C:/Build/libretro/FBNeo/dats/FinalBurn Neo (ClrMame Pro XML, SuprGrafx only).dat",
+        "Nec TurboGrafx-16": "C:/Build/libretro/FBNeo/dats/FinalBurn Neo (ClrMame Pro XML, TurboGrafx16 only).dat",
+        "Nintendo Entertainment System": "C:/Build/libretro/FBNeo/dats/FinalBurn Neo (ClrMame Pro XML, NES Games only).dat",
+        "Nintendo Family Disk System": "C:/Build/libretro/FBNeo/dats/FinalBurn Neo (ClrMame Pro XML, FDS Games only).dat",
+        "Super Nintendo Entertainment System": "C:/Build/libretro/FBNeo/dats/FinalBurn Neo (ClrMame Pro XML, SNES Games only).dat",
+        "Sega GameGear": "C:/Build/libretro/FBNeo/dats/FinalBurn Neo (ClrMame Pro XML, Game Gear only).dat",
+        "Sega Master System": "C:/Build/libretro/FBNeo/dats/FinalBurn Neo (ClrMame Pro XML, Master System only).dat",
+        "Sega Megadrive": "C:/Build/libretro/FBNeo/dats/FinalBurn Neo (ClrMame Pro XML, Megadrive only).dat",
+        "Sega SG-1000": "C:/Build/libretro/FBNeo/dats/FinalBurn Neo (ClrMame Pro XML, Sega SG-1000 only).dat",
+        "SNK Neo-Geo Pocket": "C:/Build/libretro/FBNeo/dats/FinalBurn Neo (ClrMame Pro XML, NeoGeo Pocket Games only).dat",
+        "SNK Neo-Geo CD": "",
+        "ZX Spectrum": "C:/Build/libretro/FBNeo/dats/FinalBurn Neo (ClrMame Pro XML, ZX Spectrum Games only).dat"
+    },
+    "joystick_config": {
+        "hat_scroll_cooldown": 0.02,
+        "hat_fastest_steps": 30,
+        "hat_fastest_delay": 0.0,
+        "button_up": 2,
+        "button_down": 3,
+        "button_select": 0,
+        "button_settings": 7,
+        "button_prev_tab": 4,
+        "button_next_tab": 5
+    }
+}
