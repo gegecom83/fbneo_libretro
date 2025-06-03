@@ -409,6 +409,23 @@ class SettingsDialog(QDialog):
         self.update_rom_list_callback()
         self.accept()
 
+# ----------- About Dialog ------------
+
+class AboutDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("About")
+        layout = QVBoxLayout(self)
+        label = QLabel(
+            "FinalBurn Neo [Libretro] v1.0.1\n"
+            "© 2025, gegecom83@gmail.com"
+        )
+        label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(label)
+        self.setMinimumSize(350, 120)
+
+# ----------- Main Window ------------
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -507,6 +524,10 @@ class MainWindow(QMainWindow):
         self.resize(self.sizeHint())
         self.setMaximumSize(16777215, 16777215)  # Remove any max size restriction
 
+    def show_about(self):
+        dlg = AboutDialog(self)
+        dlg.exec_()
+
     def eventFilter(self, obj, event):
         if event.type() == event.WindowActivate:
             self.is_active = True
@@ -518,6 +539,10 @@ class MainWindow(QMainWindow):
                 return True
             if event.key() == Qt.Key_F11:
                 self.toggle_fullscreen()
+                return True
+            # TAB key opens About window unless focus is in a text input
+            if event.key() == Qt.Key_Tab and not isinstance(self.focusWidget(), QLineEdit):
+                self.show_about()
                 return True
         return super().eventFilter(obj, event)
 
