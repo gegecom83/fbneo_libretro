@@ -1,25 +1,49 @@
-# fbneo_libretro.py
+# FinalBurn Neo [Libretro] Game Launcher
 
-A cross-platform graphical ROM manager and launcher for FinalBurn Neo (Libretro)  
-by [gegecom83](https://github.com/gegecom83)
+A PyQt5-based GUI launcher for FinalBurn Neo (Libretro core), supporting many retro systems, ROM metadata, and images.
 
----
-
-## Overview
-
-**fbneo_libretro.py** is a powerful and user-friendly ROM browser, manager, and launcher for the [FinalBurn Neo](https://github.com/finalburnneo/FBNeo) emulator core (Libretro).  
-It supports a broad range of classic systems and is designed for smooth navigation using both keyboard/mouse and game controllers.
-
-Key features:
+## Features
 
 - **Multi-system support:** Manage and launch ROMs for Arcade, NES, SNES, Sega, Neo-Geo, MSX, ZX Spectrum, and many more.
 - **Automatic ROM metadata:** Auto-generate ROM title lists with year and manufacturer info via XML/DAT files.
 - **Joystick navigation:** Full joystick/gamepad navigation and controls, including rapid scrolling and system switching.
 - **Configurable:** All settings (paths, controls, XML files) are easily editable in the GUI.
 - **Fast search & filtering:** Find ROMs quickly by title, year, or manufacturer.
+- **Support for Title and Preview Images with automatic prefixing**
 - **Cross-platform:** Works on Windows, Linux, and macOS (requires Python 3, PyQt5, and pygame).
 
----
+## Image Support
+
+For each ROM, the launcher can display **title and preview images**.  
+To work, place your images in the designated folders and use the correct filename prefix as specified below.
+
+### Image Naming Convention
+
+- Images must be PNG files.
+- The filename format is:  
+  `<prefix><rombasename>.png`
+- Example: For the NES ROM `mariobros.zip`, the image file would be `nes_mariobros.png`.
+
+### Image Prefixes by System
+
+| System Name                                | Prefix         |
+|---------------------------------------------|---------------|
+| CBS ColecoVision                           | `cv_`         |
+| Fairchild ChannelF                         | `chf_`        |
+| MSX 1                                      | `msx_`        |
+| Nec PC-Engine                              | `pce_`        |
+| Nec SuperGrafX                             | `sgx_`        |
+| Nec TurboGrafx-16                          | `tg_`         |
+| Nintendo Entertainment System              | `nes_`        |
+| Nintendo Family Disk System                | `fds_`        |
+| Super Nintendo Entertainment System        | `snes_`       |
+| Sega GameGear                              | `gg_`         |
+| Sega Master System                         | `sms_`        |
+| Sega Megadrive                             | `md_`         |
+| Sega SG-1000                               | `sg1k_`       |
+| SNK Neo-Geo Pocket                         | `ngp_`        |
+| ZX Spectrum                                | `spec_`       |
+| Arcade, SNK Neo-Geo CD, and others         | *(no prefix)* |
 
 ## Installation
 
@@ -49,7 +73,7 @@ python fbneo_libretro.py
 
 ## Supported Systems
 
-- Arcade (MAME/FBNeo)
+- Arcade
 - CBS ColecoVision
 - Fairchild ChannelF
 - MSX 1
@@ -67,10 +91,12 @@ python fbneo_libretro.py
 All settings are stored in `config.json` (auto-generated).  
 You can configure:
 
+- Set the directories for ROMs, Title Images, and Preview Images for each system in the **Settings** dialog.
 - Paths to RetroArch and FBNeo core (.dll/.so/.dylib)
 - ROM folders per system
 - XML/DAT metadata files per system (optional)
 - Joystick button mappings and scrolling behavior
+- If no image is available, the launcher will display `"image not available"` in place of the image.
 
 ---
 
