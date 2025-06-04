@@ -41,7 +41,7 @@
     },
     "joystick_config": {
         "hat_scroll_cooldown": 0.02,
-        "hat_fastest_steps": 30,
+        "hat_fastest_steps": 15,
         "hat_fastest_delay": 0.0,
         "button_up": 2,
         "button_down": 3,
@@ -49,5 +49,44 @@
         "button_settings": 7,
         "button_prev_tab": 4,
         "button_next_tab": 5
-    }
+    },
+    "title_image_dirs": {
+        "Arcade": "C:/Programs/FinalBurn Neo/support/titles",
+        "CBS ColecoVision": "C:/Programs/FinalBurn Neo/support/titles",
+        "Fairchild ChannelF": "C:/Programs/FinalBurn Neo/support/titles",
+        "MSX 1": "C:/Programs/FinalBurn Neo/support/titles",
+        "Nec PC-Engine": "C:/Programs/FinalBurn Neo/support/titles",
+        "Nec SuperGrafX": "C:/Programs/FinalBurn Neo/support/titles",
+        "Nec TurboGrafx-16": "C:/Programs/FinalBurn Neo/support/titles",
+        "Nintendo Entertainment System": "C:/Programs/FinalBurn Neo/support/titles",
+        "Nintendo Family Disk System": "C:/Programs/FinalBurn Neo/support/titles",
+        "Super Nintendo Entertainment System": "C:/Programs/FinalBurn Neo/support/titles",
+        "Sega GameGear": "C:/Programs/FinalBurn Neo/support/titles",
+        "Sega Master System": "C:/Programs/FinalBurn Neo/support/titles",
+        "Sega Megadrive": "C:/Programs/FinalBurn Neo/support/titles",
+        "Sega SG-1000": "C:/Programs/FinalBurn Neo/support/titles",
+        "SNK Neo-Geo Pocket": "C:/Programs/FinalBurn Neo/support/titles",
+        "SNK Neo-Geo CD": "D:/_thumbnails/SNK - Neo Geo CD/Named_Titles",
+        "ZX Spectrum": "C:/Programs/FinalBurn Neo/support/titles"
+    },
+    "preview_image_dirs": {
+        "Arcade": "C:/Programs/FinalBurn Neo/support/previews",
+        "CBS ColecoVision": "C:/Programs/FinalBurn Neo/support/previews",
+        "Fairchild ChannelF": "C:/Programs/FinalBurn Neo/support/previews",
+        "MSX 1": "C:/Programs/FinalBurn Neo/support/previews",
+        "Nec PC-Engine": "C:/Programs/FinalBurn Neo/support/previews",
+        "Nec SuperGrafX": "C:/Programs/FinalBurn Neo/support/previews",
+        "Nec TurboGrafx-16": "C:/Programs/FinalBurn Neo/support/previews",
+        "Nintendo Entertainment System": "C:/Programs/FinalBurn Neo/support/previews",
+        "Nintendo Family Disk System": "",
+        "Super Nintendo Entertainment System": "C:/Programs/FinalBurn Neo/support/previews",
+        "Sega GameGear": "C:/Programs/FinalBurn Neo/support/previews",
+        "Sega Master System": "C:/Programs/FinalBurn Neo/support/previews",
+        "Sega Megadrive": "C:/Programs/FinalBurn Neo/support/previews",
+        "Sega SG-1000": "C:/Programs/FinalBurn Neo/support/previews",
+        "SNK Neo-Geo Pocket": "C:/Programs/FinalBurn Neo/support/previews",
+        "SNK Neo-Geo CD": "D:/_thumbnails/SNK - Neo Geo CD/Named_Snaps",
+        "ZX Spectrum": "C:/Programs/FinalBurn Neo/support/previews"
+    },
+    "display_only_rom_list": false
 }
