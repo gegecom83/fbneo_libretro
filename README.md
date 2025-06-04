@@ -110,8 +110,8 @@ You can configure:
 
 ## Screenshots
 
-![main](https://github.com/gegecom83/fbneo_libretro/blob/main/main.png)
-![settings](https://github.com/gegecom83/fbneo_libretro/blob/main/settings.png) 
+![main](https://github.com/gegecom83/fbneo_libretro.py/blob/main/data/main.png)
+![settings](https://github.com/gegecom83/fbneo_libretro.py/blob/main/data/settings.png) 
 
 
 ---
