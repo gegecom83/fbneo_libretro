@@ -84,9 +84,46 @@
         "button_up": 2,
         "button_down": 3,
         "button_select": 0,
-        "button_settings": 7,
+        "button_favorites": 7,
         "button_prev_tab": 4,
         "button_next_tab": 5
     },
-    "display_only_rom_list": false
+    "display_only_rom_list": false,
+    "favorites": [
+        [
+            "Arcade",
+            "aburner.zip",
+            "After Burner",
+            "1987",
+            "Sega"
+        ],
+        [
+            "Arcade",
+            "aerfboo2.zip",
+            "Aero Fighters (bootleg, set 2)",
+            "1992",
+            "bootleg"
+        ],
+        [
+            "MSX 1",
+            "aktomatoes.zip",
+            "Attack of the Killer Tomatoes (Euro)",
+            "1986",
+            "Global Software"
+        ],
+        [
+            "Super Nintendo Entertainment System",
+            "arkanoid2.zip",
+            "Arkanoid - Doh It Again (USA)",
+            "1997",
+            "Taito"
+        ],
+        [
+            "Arcade",
+            "gtmr.zip",
+            "1000 Miglia: Great 1000 Miles Rally (Taiwan 94/07/18)",
+            "1994",
+            "Kaneko"
+        ]
+    ]
 }
