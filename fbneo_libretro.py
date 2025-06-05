@@ -46,9 +46,9 @@ DEFAULT_CONFIG = {
     "title_image_dirs": {config["name"]: "" for config in TAB_CONFIGS},
     "preview_image_dirs": {config["name"]: "" for config in TAB_CONFIGS},
     "joystick_config": {
-        "hat_scroll_cooldown": 0.02,
-        "hat_fastest_steps": 30,
-        "hat_fastest_delay": 0.5,
+        "hat_scroll_cooldown": 0.08,
+        "hat_fastest_steps": 10,
+        "hat_fastest_delay": 0.02,
         "button_up": 2,
         "button_down": 3,
         "button_select": 0,
@@ -64,8 +64,8 @@ def load_config():
         with open(CONFIG_FILE, "r", encoding="utf-8") as f:
             cfg = json.load(f)
         jc = cfg.get("joystick_config", {})
-        jc.setdefault("hat_fastest_steps", 30)
-        jc.setdefault("hat_fastest_delay", 0.5)
+        jc.setdefault("hat_fastest_steps", 10)
+        jc.setdefault("hat_fastest_delay", 0.02)
         cfg["joystick_config"] = jc
         for k in ["xml_dat_files", "title_image_dirs", "preview_image_dirs"]:
             if k not in cfg:
@@ -244,7 +244,6 @@ class SettingsDialog(QDialog):
         scroll.setWidget(main_widget)
         layout = QVBoxLayout(main_widget)
 
-        # --- General group ---
         general_group = QGroupBox("General")
         general_layout = QFormLayout()
         self.retroarch_edit = QLineEdit(str(cfg["RETROARCH"]))
@@ -271,13 +270,12 @@ class SettingsDialog(QDialog):
         general_layout.addRow("", core_hint)
         general_group.setLayout(general_layout)
 
-        # --- Joystick group ---
         joystick_group = QGroupBox("Joystick Buttons")
         joystick_layout = QFormLayout()
         jc = cfg["joystick_config"]
-        self.hat_scroll_cooldown = QLineEdit(str(jc.get("hat_scroll_cooldown", 0.02)))
-        self.hat_fastest_steps = QLineEdit(str(jc.get("hat_fastest_steps", 30)))
-        self.hat_fastest_delay = QLineEdit(str(jc.get("hat_fastest_delay", 0.5)))
+        self.hat_scroll_cooldown = QLineEdit(str(jc.get("hat_scroll_cooldown", 0.08)))
+        self.hat_fastest_steps = QLineEdit(str(jc.get("hat_fastest_steps", 10)))
+        self.hat_fastest_delay = QLineEdit(str(jc.get("hat_fastest_delay", 0.02)))
         self.button_up = QLineEdit(str(jc.get("button_up", 2)))
         self.button_down = QLineEdit(str(jc.get("button_down", 3)))
         self.button_select = QLineEdit(str(jc.get("button_select", 0)))
@@ -295,7 +293,6 @@ class SettingsDialog(QDialog):
         joystick_layout.addRow("Button Next System Index:", self.button_next_tab)
         joystick_group.setLayout(joystick_layout)
 
-        # --- System group ---
         sys_group = QGroupBox("System")
         sys_layout = QFormLayout()
         self.sys_dropdown = QComboBox()
@@ -445,14 +442,30 @@ class AboutDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("About")
-        layout = QVBoxLayout(self)
-        label = QLabel(
-            "FinalBurn Neo [Libretro] v1.0.2\n"
-            "© 2025, gegecom83@gmail.com"
+        layout = QHBoxLayout(self)
+
+        logo_label = QLabel()
+        icon_path = "icon.ico" if sys.platform.startswith("win") else "icon.png"
+        if os.path.exists(icon_path):
+            pixmap = QPixmap(icon_path)
+            if not pixmap.isNull():
+                scaled_pixmap = pixmap.scaled(64, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                logo_label.setPixmap(scaled_pixmap)
+        logo_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        layout.addWidget(logo_label)
+
+        text_label = QLabel(
+            "The MIT License (MIT)\n"
+            "\n"
+            "Copyright (c) 2025 FinalBurn Neo [Libretro] v1.0.4\n"
+            "\n"
+            "Contact: gegecom83@gmail.com"
         )
-        label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(label)
-        self.setMinimumSize(350, 120)
+        text_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(text_label, stretch=1)
+
+        self.setLayout(layout)
+        self.setMinimumSize(400, 120)
 
 class AspectRatioLabel(QLabel):
     def __init__(self, *args, **kwargs):
@@ -605,9 +618,10 @@ class MainWindow(QMainWindow):
         if self.joystick:
             self.joystick.init()
         self.last_hat = (0, 0)
-        self.last_hat_move_time = time.time()
-        self.last_hat_held = {"left": False, "right": False}
-        self.last_hat_held_time = {"left": 0, "right": 0}
+        self.last_hat_held = {"left": False, "right": False, "up": False, "down": False}
+        self.last_hat_held_time = {"left": 0, "right": 0, "up": 0, "down": 0}
+        self.last_key_held = {"left": False, "right": False}
+        self.last_key_held_time = {"left": 0, "right": 0}
         self.last_button_state = {}
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.poll_joystick)
@@ -639,8 +653,8 @@ class MainWindow(QMainWindow):
             self.is_active = True
         elif event.type() == event.WindowDeactivate:
             self.is_active = False
-        if event.type() == event.KeyPress:
-            if obj == self.roms_list and event.key() in (Qt.Key_Return, Qt.Key_Enter):
+        if event.type() == event.KeyPress and obj == self.roms_list:
+            if event.key() in (Qt.Key_Return, Qt.Key_Enter):
                 self.launch_selected_rom()
                 return True
             if event.key() == Qt.Key_F11:
@@ -648,6 +662,21 @@ class MainWindow(QMainWindow):
                 return True
             if event.key() == Qt.Key_Tab and not isinstance(self.focusWidget(), QLineEdit):
                 self.show_about()
+                return True
+            if event.key() == Qt.Key_Left:
+                self.last_key_held["left"] = True
+                self.last_key_held_time["left"] = time.time()
+                return True
+            if event.key() == Qt.Key_Right:
+                self.last_key_held["right"] = True
+                self.last_key_held_time["right"] = time.time()
+                return True
+        elif event.type() == event.KeyRelease and obj == self.roms_list:
+            if event.key() == Qt.Key_Left:
+                self.last_key_held["left"] = False
+                return True
+            if event.key() == Qt.Key_Right:
+                self.last_key_held["right"] = False
                 return True
         return super().eventFilter(obj, event)
 
@@ -750,55 +779,69 @@ class MainWindow(QMainWindow):
     def poll_joystick(self):
         if not self.isActiveWindow() or not self.is_active:
             return
-        if not self.joystick:
-            return
         pygame.event.pump()
         jc = self.cfg["joystick_config"]
-        fastest_steps = jc.get("hat_fastest_steps", 30)
-        fastest_delay = jc.get("hat_fastest_delay", 0.5)
+        fastest_steps = jc.get("hat_fastest_steps", 10)
+        fastest_delay = jc.get("hat_fastest_delay", 0.02)
+        scroll_cooldown = jc.get("hat_scroll_cooldown", 0.08)
         now = time.time()
         list_widget = self.roms_list
         idx = list_widget.currentRow()
         size = list_widget.count()
 
-        if self.joystick.get_numhats() > 0:
+        def scroll_list(direction, steps, held_key, held_time_key, is_keyboard=False):
+            state_dict = self.last_key_held if is_keyboard else self.last_hat_held
+            time_dict = self.last_key_held_time if is_keyboard else self.last_hat_held_time
+            if direction:
+                if not state_dict.get(held_key, False):
+                    list_widget.setCurrentRow(max(0, idx - steps) if held_key == "left" else min(size - 1, idx + steps))
+                    state_dict[held_key] = True
+                    time_dict[held_key] = now
+                elif now - time_dict.get(held_key, 0) > fastest_delay:
+                    list_widget.setCurrentRow(max(0, list_widget.currentRow() - steps) if held_key == "left" else min(size - 1, list_widget.currentRow() + steps))
+                    time_dict[held_key] = now - (fastest_delay - 0.05)
+                elif now - time_dict.get(held_key, 0) > 0.2:
+                    list_widget.setCurrentRow(max(0, list_widget.currentRow() - steps) if held_key == "left" else min(size - 1, list_widget.currentRow() + steps))
+                    time_dict[held_key] = now
+            else:
+                state_dict[held_key] = False
+
+        if self.joystick and self.joystick.get_numhats() > 0:
             hat = self.joystick.get_hat(0)
-            if hat[1] == 1 and (self.last_hat[1] != 1):
-                list_widget.setCurrentRow(max(0, idx - 1))
-            elif hat[1] == -1 and (self.last_hat[1] != -1):
-                list_widget.setCurrentRow(min(size - 1, idx + 1))
+            hat_up = hat[1] == 1
+            hat_down = hat[1] == -1
             hat_left = hat[0] == -1
             hat_right = hat[0] == 1
 
-            if hat_left:
-                if not self.last_hat_held["left"]:
-                    list_widget.setCurrentRow(max(0, idx - fastest_steps))
-                    self.last_hat_held_time["left"] = now
-                elif now - self.last_hat_held_time["left"] > fastest_delay:
-                    list_widget.setCurrentRow(max(0, list_widget.currentRow() - fastest_steps))
-                    self.last_hat_held_time["left"] = now - (fastest_delay - 0.05)
-                elif now - self.last_hat_held_time["left"] > 0.2:
-                    list_widget.setCurrentRow(max(0, list_widget.currentRow() - fastest_steps))
-                    self.last_hat_held_time["left"] = now
-                self.last_hat_held["left"] = True
+            if hat_up:
+                if not self.last_hat_held.get("up", False):
+                    list_widget.setCurrentRow(max(0, idx - 1))
+                    self.last_hat_held_time["up"] = now
+                    self.last_hat_held["up"] = True
+                elif now - self.last_hat_held_time["up"] >= scroll_cooldown:
+                    list_widget.setCurrentRow(max(0, list_widget.currentRow() - 1))
+                    self.last_hat_held_time["up"] = now
             else:
-                self.last_hat_held["left"] = False
+                self.last_hat_held["up"] = False
 
-            if hat_right:
-                if not self.last_hat_held["right"]:
-                    list_widget.setCurrentRow(min(size - 1, idx + fastest_steps))
-                    self.last_hat_held_time["right"] = now
-                elif now - self.last_hat_held_time["right"] > fastest_delay:
-                    list_widget.setCurrentRow(min(size - 1, list_widget.currentRow() + fastest_steps))
-                    self.last_hat_held_time["right"] = now - (fastest_delay - 0.05)
-                elif now - self.last_hat_held_time["right"] > 0.2:
-                    list_widget.setCurrentRow(min(size - 1, list_widget.currentRow() + fastest_steps))
-                    self.last_hat_held_time["right"] = now
-                self.last_hat_held["right"] = True
+            if hat_down:
+                if not self.last_hat_held.get("down", False):
+                    list_widget.setCurrentRow(min(size - 1, idx + 1))
+                    self.last_hat_held_time["down"] = now
+                    self.last_hat_held["down"] = True
+                elif now - self.last_hat_held_time["down"] >= scroll_cooldown:
+                    list_widget.setCurrentRow(min(size - 1, list_widget.currentRow() + 1))
+                    self.last_hat_held_time["down"] = now
             else:
-                self.last_hat_held["right"] = False
+                self.last_hat_held["down"] = False
+
+            scroll_list(hat_left, fastest_steps, "left", "left", is_keyboard=False)
+            scroll_list(hat_right, fastest_steps, "right", "right", is_keyboard=False)
 
             self.last_hat = hat
+
+        scroll_list(self.last_key_held.get("left", False), fastest_steps, "left", "left", is_keyboard=True)
+        scroll_list(self.last_key_held.get("right", False), fastest_steps, "right", "right", is_keyboard=True)
 
         def check_button(btn_key, action):
             idx = jc.get(btn_key, -1)
@@ -809,12 +852,13 @@ class MainWindow(QMainWindow):
                 action()
             self.last_button_state[btn_key] = pressed
 
-        check_button("button_up", lambda: self.roms_list.setCurrentRow(max(0, self.roms_list.currentRow() - 1)))
-        check_button("button_down", lambda: self.roms_list.setCurrentRow(min(self.roms_list.count() - 1, self.roms_list.currentRow() + 1)))
-        check_button("button_select", self.launch_selected_rom)
-        check_button("button_settings", self.show_settings)
-        check_button("button_prev_tab", lambda: self.systems_combo.setCurrentIndex((self.systems_combo.currentIndex() - 1) % self.systems_combo.count()))
-        check_button("button_next_tab", lambda: self.systems_combo.setCurrentIndex((self.systems_combo.currentIndex() + 1) % self.systems_combo.count()))
+        if self.joystick:
+            check_button("button_up", lambda: self.roms_list.setCurrentRow(max(0, self.roms_list.currentRow() - 1)))
+            check_button("button_down", lambda: self.roms_list.setCurrentRow(min(self.roms_list.count() - 1, self.roms_list.currentRow() + 1)))
+            check_button("button_select", self.launch_selected_rom)
+            check_button("button_settings", self.show_settings)
+            check_button("button_prev_tab", lambda: self.systems_combo.setCurrentIndex((self.systems_combo.currentIndex() - 1) % self.systems_combo.count()))
+            check_button("button_next_tab", lambda: self.systems_combo.setCurrentIndex((self.systems_combo.currentIndex() + 1) % self.systems_combo.count()))
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
