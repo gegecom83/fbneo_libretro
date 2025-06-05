@@ -39,17 +39,6 @@
         "SNK Neo-Geo CD": "",
         "ZX Spectrum": "C:/Build/libretro/FBNeo/dats/FinalBurn Neo (ClrMame Pro XML, ZX Spectrum Games only).dat"
     },
-    "joystick_config": {
-        "hat_scroll_cooldown": 0.02,
-        "hat_fastest_steps": 15,
-        "hat_fastest_delay": 0.0,
-        "button_up": 2,
-        "button_down": 3,
-        "button_select": 0,
-        "button_settings": 7,
-        "button_prev_tab": 4,
-        "button_next_tab": 5
-    },
     "title_image_dirs": {
         "Arcade": "C:/Programs/FinalBurn Neo/support/titles",
         "CBS ColecoVision": "C:/Programs/FinalBurn Neo/support/titles",
@@ -87,6 +76,17 @@
         "SNK Neo-Geo Pocket": "C:/Programs/FinalBurn Neo/support/previews",
         "SNK Neo-Geo CD": "D:/_thumbnails/SNK - Neo Geo CD/Named_Snaps",
         "ZX Spectrum": "C:/Programs/FinalBurn Neo/support/previews"
+    },
+    "joystick_config": {
+        "hat_scroll_cooldown": 0.08,
+        "hat_fastest_steps": 10,
+        "hat_fastest_delay": 0.02,
+        "button_up": 2,
+        "button_down": 3,
+        "button_select": 0,
+        "button_settings": 7,
+        "button_prev_tab": 4,
+        "button_next_tab": 5
     },
     "display_only_rom_list": false
 }
