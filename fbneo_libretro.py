@@ -97,6 +97,10 @@ def load_rom_titles(filename: str):
     return rom_titles
 
 def parse_dat_metadata(xml_path):
+    """
+    Parse the XML/DAT file and return a meta dictionary excluding <game isbios="yes"> entries.
+    Each entry maps rom name -> (title, year, manufacturer).
+    """
     meta = {}
     if not xml_path or not os.path.exists(xml_path):
         return meta
@@ -104,6 +108,8 @@ def parse_dat_metadata(xml_path):
         tree = ET.parse(xml_path)
         root = tree.getroot()
         for entry in root.findall(".//game") + root.findall(".//machine"):
+            if entry.attrib.get("isbios", "no") == "yes":
+                continue
             name = entry.attrib.get("name") or entry.attrib.get("romname") or ""
             title_node = entry.find("description")
             year_node = entry.find("year")
@@ -457,7 +463,7 @@ class AboutDialog(QDialog):
         text_label = QLabel(
             "The MIT License (MIT)\n"
             "\n"
-            "Copyright (c) 2025 FinalBurn Neo [Libretro] v1.0.4\n"
+            "Copyright (c) 2025 FinalBurn Neo [Libretro] v1.0.5\n"
             "\n"
             "Contact: gegecom83@gmail.com"
         )
@@ -476,24 +482,40 @@ class AspectRatioLabel(QLabel):
         self.setText(self._placeholder_text)
 
     def setPixmap(self, pixmap):
+        self._pixmap = pixmap
         if pixmap and not pixmap.isNull():
-            self._pixmap = pixmap
             self.setText("")
-            super().setPixmap(self._pixmap)
+            self._scale_pixmap()
         else:
             self._pixmap = None
             super().setPixmap(QPixmap())
             self.setText(self._placeholder_text)
         self.update()
 
+    def _scale_pixmap(self):
+        if not self._pixmap or self._pixmap.isNull():
+            return
+        available_size = self.size()
+        parent = self.parent()
+        if parent and isinstance(parent, QTabWidget):
+            available_size = parent.size()
+        max_width = min(available_size.width(), 640)
+        max_height = min(available_size.height(), 480)
+        scaled_pixmap = self._pixmap.scaled(
+            max_width,
+            max_height,
+            Qt.KeepAspectRatio,
+            Qt.SmoothTransformation
+        )
+        super().setPixmap(scaled_pixmap)
+
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        if self._pixmap:
-            scaled = self._pixmap.scaled(
-                self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation
-            )
-            super().setPixmap(scaled)
-            self.setText("")
+        if self._pixmap and not self._pixmap.isNull():
+            self._scale_pixmap()
+        else:
+            super().setPixmap(QPixmap())
+            self.setText(self._placeholder_text)
         self.update()
 
     def clear(self):
