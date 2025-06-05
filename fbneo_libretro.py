@@ -10,10 +10,10 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QListWidget, QLineEdit, QPushButton, QLabel, QFileDialog, QMessageBox,
     QDialog, QFormLayout, QComboBox, QGroupBox, QScrollArea, QSizePolicy,
-    QTabWidget, QSplitter, QCheckBox
+    QTabWidget, QSplitter, QCheckBox, QMenu
 )
 from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtGui import QIcon, QPixmap, QContextMenuEvent
 
 import pygame
 
@@ -52,11 +52,12 @@ DEFAULT_CONFIG = {
         "button_up": 2,
         "button_down": 3,
         "button_select": 0,
-        "button_settings": 7,
+        "button_favorites": 7,
         "button_prev_tab": 4,
         "button_next_tab": 5
     },
-    "display_only_rom_list": False
+    "display_only_rom_list": False,
+    "favorites": []
 }
 
 def load_config():
@@ -72,6 +73,8 @@ def load_config():
                 cfg[k] = {config["name"]: "" for config in TAB_CONFIGS}
         if "display_only_rom_list" not in cfg:
             cfg["display_only_rom_list"] = False
+        if "favorites" not in cfg:
+            cfg["favorites"] = []
         return cfg
     else:
         save_config(DEFAULT_CONFIG)
@@ -235,6 +238,135 @@ def run_rom(rom, roms_dir, retroarch, core, system_name, win):
     except Exception as e:
         QMessageBox.critical(win, "Error", f"Failed to launch ROM: {e}")
 
+class FavoritesDialog(QDialog):
+    def __init__(self, cfg, parent, current_system_callback):
+        super().__init__(parent)
+        self.setWindowTitle("Favorite ROMs")
+        self.cfg = cfg
+        self.current_system_callback = current_system_callback
+        self.layout = QVBoxLayout(self)
+
+        self.favorites_list = QListWidget()
+        self.favorites_list.setMinimumWidth(420)
+        self.favorites_list.itemDoubleClicked.connect(self.launch_selected_favorite)
+        self.favorites_list.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.favorites_list.customContextMenuRequested.connect(self.show_context_menu)
+        self.favorites_list.installEventFilter(self)
+        self.layout.addWidget(self.favorites_list)
+
+        self.update_favorites_list()
+        self.setMinimumSize(460, 400)
+
+        self.joystick = pygame.joystick.Joystick(0) if pygame.joystick.get_count() > 0 else None
+        if self.joystick:
+            self.joystick.init()
+        self.last_hat = (0, 0)
+        self.last_hat_held = {"left": False, "right": False, "up": False, "down": False}
+        self.last_hat_held_time = {"left": 0, "right": 0, "up": 0, "down": 0}
+        self.last_button_state = {}
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.poll_joystick)
+        self.timer.start(20)
+
+        self.setFocusPolicy(Qt.StrongFocus)
+        self.favorites_list.setFocusPolicy(Qt.StrongFocus)
+        self.favorites_list.setFocus()
+
+    def update_favorites_list(self):
+        self.favorites_list.clear()
+        for fav in self.cfg["favorites"]:
+            system_name, rom, title, year, manuf = fav
+            display = f"{title} [{system_name}]"
+            if year or manuf:
+                display += f" [{year}]" if year else ""
+                display += f" ({manuf})" if manuf else ""
+            self.favorites_list.addItem(display)
+
+    def launch_selected_favorite(self, *args):
+        idx = self.favorites_list.currentRow()
+        if idx < 0 or not self.cfg["favorites"]:
+            QMessageBox.warning(self, "Warning", "Select a favorite ROM.")
+            return
+        system_name, rom, _, _, _ = self.cfg["favorites"][idx]
+        roms_dir = self.cfg["roms_dirs"].get(system_name, "")
+        run_rom(rom, roms_dir, self.cfg["RETROARCH"], self.cfg["RETROARCH_CORE"], system_name, self)
+
+    def show_context_menu(self, position):
+        idx = self.favorites_list.currentRow()
+        if idx < 0 or not self.cfg["favorites"]:
+            return
+        menu = QMenu()
+        remove_from_favorites = menu.addAction("Remove from Favorites")
+        action = menu.exec_(self.favorites_list.mapToGlobal(position))
+        if action == remove_from_favorites:
+            self.remove_selected_favorite(idx)
+
+    def remove_selected_favorite(self, idx):
+        if idx < 0 or not self.cfg["favorites"]:
+            QMessageBox.warning(self, "Warning", "Select a favorite ROM to remove.")
+            return
+        title = self.cfg["favorites"][idx][2]
+        self.cfg["favorites"].pop(idx)
+        save_config(self.cfg)
+        self.update_favorites_list()
+        QMessageBox.information(self, "Favorites", f"Removed '{title}' from favorites.")
+
+    def poll_joystick(self):
+        if not self.isActiveWindow():
+            return
+        pygame.event.pump()
+        jc = self.cfg["joystick_config"]
+        fastest_steps = jc.get("hat_fastest_steps", 10)
+        fastest_delay = jc.get("hat_fastest_delay", 0.02)
+        scroll_cooldown = jc.get("hat_scroll_cooldown", 0.08)
+        now = time.time()
+        list_widget = self.favorites_list
+        idx = list_widget.currentRow()
+        size = list_widget.count()
+
+        def scroll_list(direction, steps, held_key, held_time_key):
+            if direction:
+                if not self.last_hat_held.get(held_key, False):
+                    list_widget.setCurrentRow(max(0, idx - steps) if held_key == "up" else min(size - 1, idx + steps))
+                    self.last_hat_held_time[held_key] = now
+                    self.last_hat_held[held_key] = True
+                elif now - self.last_hat_held_time.get(held_key, 0) >= scroll_cooldown:
+                    list_widget.setCurrentRow(max(0, idx - steps) if held_key == "up" else min(size - 1, idx + steps))
+                    self.last_hat_held_time[held_key] = now
+            else:
+                self.last_hat_held[held_key] = False
+
+        if self.joystick and self.joystick.get_numhats() > 0:
+            hat = self.joystick.get_hat(0)
+            hat_up = hat[1] == 1
+            hat_down = hat[1] == -1
+
+            scroll_list(hat_up, 1, "up", "up")
+            scroll_list(hat_down, 1, "down", "down")
+
+            self.last_hat = hat
+
+        def check_button(btn_key, action):
+            idx = jc.get(btn_key, -1)
+            if idx < 0 or idx >= self.joystick.get_numbuttons():
+                return
+            pressed = self.joystick.get_button(idx)
+            if pressed and not self.last_button_state.get(btn_key, False):
+                action()
+            self.last_button_state[btn_key] = pressed
+
+        if self.joystick:
+            check_button("button_up", lambda: self.favorites_list.setCurrentRow(max(0, self.favorites_list.currentRow() - 1)))
+            check_button("button_down", lambda: self.favorites_list.setCurrentRow(min(self.favorites_list.count() - 1, self.favorites_list.currentRow() + 1)))
+            check_button("button_select", self.launch_selected_favorite)
+
+    def eventFilter(self, obj, event):
+        if event.type() == event.KeyPress and obj == self.favorites_list:
+            if event.key() in (Qt.Key_Return, Qt.Key_Enter):
+                self.launch_selected_favorite()
+                return True
+        return super().eventFilter(obj, event)
+
 class SettingsDialog(QDialog):
     def __init__(self, cfg, parent, current_system_callback, auto_create_titles_callback, update_rom_list_callback):
         super().__init__(parent)
@@ -285,7 +417,7 @@ class SettingsDialog(QDialog):
         self.button_up = QLineEdit(str(jc.get("button_up", 2)))
         self.button_down = QLineEdit(str(jc.get("button_down", 3)))
         self.button_select = QLineEdit(str(jc.get("button_select", 0)))
-        self.button_settings = QLineEdit(str(jc.get("button_settings", 7)))
+        self.button_favorites = QLineEdit(str(jc.get("button_favorites", 7)))
         self.button_prev_tab = QLineEdit(str(jc.get("button_prev_tab", 4)))
         self.button_next_tab = QLineEdit(str(jc.get("button_next_tab", 5)))
         joystick_layout.addRow("Hat Scroll Cooldown (s):", self.hat_scroll_cooldown)
@@ -294,7 +426,7 @@ class SettingsDialog(QDialog):
         joystick_layout.addRow("Button Up Index:", self.button_up)
         joystick_layout.addRow("Button Down Index:", self.button_down)
         joystick_layout.addRow("Button Select Index:", self.button_select)
-        joystick_layout.addRow("Button Settings Index:", self.button_settings)
+        joystick_layout.addRow("Button Favorites Index:", self.button_favorites)
         joystick_layout.addRow("Button Prev System Index:", self.button_prev_tab)
         joystick_layout.addRow("Button Next System Index:", self.button_next_tab)
         joystick_group.setLayout(joystick_layout)
@@ -429,7 +561,7 @@ class SettingsDialog(QDialog):
             jc["button_up"] = int(self.button_up.text())
             jc["button_down"] = int(self.button_down.text())
             jc["button_select"] = int(self.button_select.text())
-            jc["button_settings"] = int(self.button_settings.text())
+            jc["button_favorites"] = int(self.button_favorites.text())
             jc["button_prev_tab"] = int(self.button_prev_tab.text())
             jc["button_next_tab"] = int(self.button_next_tab.text())
         except Exception:
@@ -463,7 +595,7 @@ class AboutDialog(QDialog):
         text_label = QLabel(
             "The MIT License (MIT)\n"
             "\n"
-            "Copyright (c) 2025 FinalBurn Neo [Libretro] v1.0.5\n"
+            "Copyright (c) 2025 FinalBurn Neo [Libretro] v1.0.6\n"
             "\n"
             "Contact: gegecom83@gmail.com"
         )
@@ -576,6 +708,8 @@ class MainWindow(QMainWindow):
         self.roms_list.setMinimumWidth(420)
         self.roms_list.itemDoubleClicked.connect(self.launch_selected_rom)
         self.roms_list.installEventFilter(self)
+        self.roms_list.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.roms_list.customContextMenuRequested.connect(self.show_context_menu)
 
         self.rom_count_label = QLabel()
         self.rom_count_label.setSizePolicy(self.rom_count_label.sizePolicy().horizontalPolicy(), self.rom_count_label.sizePolicy().verticalPolicy())
@@ -585,9 +719,15 @@ class MainWindow(QMainWindow):
         self.settings_btn.setMinimumHeight(24)
         self.settings_btn.clicked.connect(self.show_settings)
 
+        self.favorites_btn = QPushButton("Favorites")
+        self.favorites_btn.setMaximumWidth(80)
+        self.favorites_btn.setMinimumHeight(24)
+        self.favorites_btn.clicked.connect(self.show_favorites)
+
         settings_row = QHBoxLayout()
         settings_row.addWidget(self.rom_count_label)
         settings_row.addStretch(1)
+        settings_row.addWidget(self.favorites_btn)
         settings_row.addWidget(self.settings_btn)
 
         layout = QVBoxLayout()
@@ -669,6 +809,32 @@ class MainWindow(QMainWindow):
     def show_about(self):
         dlg = AboutDialog(self)
         dlg.exec_()
+
+    def show_favorites(self):
+        dlg = FavoritesDialog(self.cfg, self, self.current_system)
+        dlg.exec_()
+
+    def show_context_menu(self, position):
+        idx = self.roms_list.currentRow()
+        if idx < 0 or not self.roms or self.roms_list.item(idx).text() == "No ROMs found.":
+            return
+
+        menu = QMenu()
+        add_to_favorites = menu.addAction("Add to Favorites")
+        action = menu.exec_(self.roms_list.mapToGlobal(position))
+
+        if action == add_to_favorites:
+            self.add_to_favorites(idx)
+
+    def add_to_favorites(self, idx):
+        sys_cfg, _ = self.current_system()
+        sys_name = sys_cfg["name"]
+        rom, title, year, manuf = self.roms[idx]
+        favorite = (sys_name, rom, title, year, manuf)
+        if favorite not in self.cfg["favorites"]:
+            self.cfg["favorites"].append(favorite)
+            save_config(self.cfg)
+            QMessageBox.information(self, "Favorites", f"Added '{title}' to favorites.")
 
     def eventFilter(self, obj, event):
         if event.type() == event.WindowActivate:
@@ -878,7 +1044,7 @@ class MainWindow(QMainWindow):
             check_button("button_up", lambda: self.roms_list.setCurrentRow(max(0, self.roms_list.currentRow() - 1)))
             check_button("button_down", lambda: self.roms_list.setCurrentRow(min(self.roms_list.count() - 1, self.roms_list.currentRow() + 1)))
             check_button("button_select", self.launch_selected_rom)
-            check_button("button_settings", self.show_settings)
+            check_button("button_favorites", self.show_favorites)
             check_button("button_prev_tab", lambda: self.systems_combo.setCurrentIndex((self.systems_combo.currentIndex() - 1) % self.systems_combo.count()))
             check_button("button_next_tab", lambda: self.systems_combo.setCurrentIndex((self.systems_combo.currentIndex() + 1) % self.systems_combo.count()))
 
