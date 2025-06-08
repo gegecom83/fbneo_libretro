@@ -139,12 +139,13 @@ def auto_create_rom_titles(roms_dir, xml_path, system_name, rom_titles_file):
             f for f in os.listdir(roms_dir)
             if os.path.isfile(os.path.join(roms_dir, f)) and f.lower().endswith(('.zip', '.7z', '.cue'))
         ]
-    rom_bases = [Path(f).stem.lower() for f in roms]
+    rom_bases = [Path(f).stem for f in roms]  # Preserve original case
+    rom_bases_lower = [base.lower() for base in rom_bases]  # Lowercase for meta lookup
     meta = parse_dat_metadata(xml_path) if xml_path else {}
     lines = []
-    for rom, base in zip(roms, rom_bases):
-        if base in meta:
-            title, year, manuf = meta[base]
+    for rom, base, base_lower in zip(roms, rom_bases, rom_bases_lower):
+        if base_lower in meta:
+            title, year, manuf = meta[base_lower]
             lines.append(f"{base} \"{title}\" \"{year}\" \"{manuf}\"")
         else:
             lines.append(f"{base} \"{base}\"")
@@ -154,6 +155,16 @@ def auto_create_rom_titles(roms_dir, xml_path, system_name, rom_titles_file):
         return True, len(lines)
     except Exception as e:
         return False, str(e)
+        
+ROM_HIDE_LIST = {"neocdz", "rom_to_hide2"}
+
+def find_file_case_insensitive(directory, filename):
+    if not directory or not os.path.isdir(directory):
+        return None
+    for f in os.listdir(directory):
+        if f.lower() == filename.lower():
+            return os.path.join(directory, f)
+    return None
 
 def get_rom_list_cached(rom_titles_file, roms_dir, system_name, xml_dat_file, cache_dict):
     cache_key = (roms_dir, system_name, xml_dat_file)
@@ -180,6 +191,8 @@ def get_rom_list_cached(rom_titles_file, roms_dir, system_name, xml_dat_file, ca
     rom_list = []
     for rom in roms:
         stem = Path(rom).stem
+        if stem.lower() in ROM_HIDE_LIST:
+            continue
         if system_name == "SNK Neo-Geo CD":
             if stem.lower() in meta:
                 title, year, manuf = meta[stem.lower()]
@@ -595,7 +608,7 @@ class AboutDialog(QDialog):
         text_label = QLabel(
             "The MIT License (MIT)\n"
             "\n"
-            "Copyright (c) 2025 FinalBurn Neo [Libretro] v1.0.6\n"
+            "Copyright (c) 2025 FinalBurn Neo [Libretro] v1.0.8\n"
             "\n"
             "Contact: gegecom83@gmail.com"
         )
@@ -887,21 +900,17 @@ class MainWindow(QMainWindow):
         sys_name = sys_cfg["name"]
         prefix = self.SYSTEM_IMAGE_PREFIXES.get(sys_name, "")
         base_name = Path(rom).stem.lower()
-
-        title_dir = self.cfg["title_image_dirs"].get(sys_name, "")
-        preview_dir = self.cfg["preview_image_dirs"].get(sys_name, "")
-
         title_filename = f"{prefix}{base_name}.png"
         preview_filename = f"{prefix}{base_name}.png"
-
-        title_path = os.path.join(title_dir, title_filename) if title_dir else None
-        preview_path = os.path.join(preview_dir, preview_filename) if preview_dir else None
-
-        if title_path and os.path.exists(title_path):
+        title_dir = self.cfg["title_image_dirs"].get(sys_name, "")
+        preview_dir = self.cfg["preview_image_dirs"].get(sys_name, "")
+        title_path = find_file_case_insensitive(title_dir, title_filename) if title_dir else None
+        preview_path = find_file_case_insensitive(preview_dir, preview_filename) if preview_dir else None
+        if title_path:
             self.title_img_label.setPixmap(QPixmap(title_path))
         else:
             self.title_img_label.setPixmap(None)
-        if preview_path and os.path.exists(preview_path):
+        if preview_path:
             self.preview_img_label.setPixmap(QPixmap(preview_path))
         else:
             self.preview_img_label.setPixmap(None)
