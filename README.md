@@ -98,8 +98,6 @@ You can configure:
 - Joystick button mappings and scrolling behavior
 - If no image is available, the launcher will display `"image not available"` in place of the image.
 
----
-
 The "Auto-create ROM Titles" button is a utility to generate rom_titles_xxxx.txt files, which provide a convenient way to store and display ROM metadata (titles, years, manufacturers) for a system, especially when XML/DAT files are absent or incomplete. However, the application can still display ROMs correctly without these files because it can fall back to XML/DAT metadata or, for specific systems like SNK Neo-Geo CD, use the ROM filenames as titles. The button is particularly useful for:
 
     Systems without XML/DAT files.
@@ -107,6 +105,8 @@ The "Auto-create ROM Titles" button is a utility to generate rom_titles_xxxx.txt
     Creating a portable, simplified metadata file that can be manually edited if needed.
 
 If the rom_titles_xxxx.txt file is missing, the application relies on the XML/DAT file for metadata. For ROMs not found in the XML/DAT file, it uses the ROM's base filename as the title (for SNK Neo-Geo CD) or skips the ROM (for other systems).
+
+---
 
 ## Dependencies
 
