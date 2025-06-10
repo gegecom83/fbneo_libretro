@@ -67,7 +67,7 @@
         "Nec SuperGrafX": "C:/Programs/FinalBurn Neo/support/previews",
         "Nec TurboGrafx-16": "C:/Programs/FinalBurn Neo/support/previews",
         "Nintendo Entertainment System": "C:/Programs/FinalBurn Neo/support/previews",
-        "Nintendo Family Disk System": "",
+        "Nintendo Family Disk System": "C:/Programs/FinalBurn Neo/support/previews",
         "Super Nintendo Entertainment System": "C:/Programs/FinalBurn Neo/support/previews",
         "Sega GameGear": "C:/Programs/FinalBurn Neo/support/previews",
         "Sega Master System": "C:/Programs/FinalBurn Neo/support/previews",
@@ -105,25 +105,18 @@
             "bootleg"
         ],
         [
-            "MSX 1",
-            "aktomatoes.zip",
-            "Attack of the Killer Tomatoes (Euro)",
-            "1986",
-            "Global Software"
-        ],
-        [
-            "Super Nintendo Entertainment System",
-            "arkanoid2.zip",
-            "Arkanoid - Doh It Again (USA)",
-            "1997",
-            "Taito"
-        ],
-        [
             "Arcade",
             "gtmr.zip",
             "1000 Miglia: Great 1000 Miles Rally (Taiwan 94/07/18)",
             "1994",
             "Kaneko"
+        ],
+        [
+            "Arcade",
+            "ad2083.zip",
+            "A. D. 2083",
+            "1983",
+            "Midcoin"
         ]
     ]
 }
